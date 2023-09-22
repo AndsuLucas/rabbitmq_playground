@@ -1,0 +1,61 @@
+version: '3'
+
+networks:
+  svnet:
+
+services:
+  app:
+    container_name: srv2_nginx
+    build:
+      context: ./dockerfiles
+      dockerfile: nginx.dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    ports:
+      - "81:80"
+    volumes:
+      - ./src:/var/www/html:delegated
+    depends_on:
+      - php
+      - redis
+    networks:
+      - svnet
+  php:
+    container_name: srv2_php
+    build:
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    ports:
+      - "9001:9000"
+    volumes:
+      - ./src:/var/www/html:delegated
+    networks:
+      - svnet
+  redis:
+    container_name: srv2_redis
+    image: redis:alpine
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    networks:
+      - svnet
+
+  composer:
+    container_name: srv2_composer
+    build:
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - php
+    entrypoint: [ 'composer', '--ignore-platform-reqs' ]
+    networks:
+      - svnet

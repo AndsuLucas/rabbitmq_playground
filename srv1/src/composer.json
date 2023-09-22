@@ -1,0 +1,11 @@
+{
+    "name": "srv1/app",
+    "require": {
+        "php-amqplib/php-amqplib": "^3.5.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Srv1\\App\\": "App/"
+        }
+    }
+}
